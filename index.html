@@ -1,561 +1,886 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ethics Beyond Boundaries — Course App Suite</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>What Happens to Workers — Metabolic Economy Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
+
 :root{
-  --teal:#0f766e;--teal-dark:#0d5e57;--teal-mid:#14b8a6;--teal-light:#ccfbf1;
-  --amber:#f59e0b;--amber-dark:#92400e;--amber-light:#fef3c7;
-  --navy:#1a2744;--ink:#1f2937;--muted:#6b7280;
-  --border:#e5e7eb;--paper:#f9fafb;
-  --sky:#1e3a8a;--sky-light:#dbeafe;
-  --green:#166534;--green-light:#dcfce7;
-  --red:#dc2626;--red-light:#fee2e2;
+  --ink:#0f1117; --page:#f8f5ef; --warm:#f2ede4;
+  --rule:#d9d0c4; --rule-strong:#b8a88a;
+  --s1:#c0392b; --s2:#e67e22; --s3:#27ae60;
+  --s1l:rgba(192,57,43,.10); --s2l:rgba(230,126,34,.10); --s3l:rgba(39,174,96,.10);
+  --gold:#c9a84c; --teal:#0d5e57;
+  --serif:'Source Serif 4',Georgia,serif;
+  --sans:'Syne',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Cormorant Garamond','Georgia',serif;background:linear-gradient(135deg,#0a1628 0%,#112240 50%,#0a1628 100%);min-height:100vh;color:var(--ink)}
-.wrap{max-width:1000px;margin:0 auto;padding:1rem 1rem 3rem}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--page);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:16px;
+  line-height:1.65;
+}
 
-/* HEADER */
-.site-header{text-align:center;padding:2.5rem 1rem 2rem;color:white}
-.site-header .label{font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(20,184,166,.75);margin-bottom:.5rem}
-.site-header h1{font-size:2.2rem;font-weight:700;color:white;margin-bottom:.4rem;line-height:1.15}
-.site-header .sub{font-size:1rem;color:rgba(255,255,255,.48);font-style:italic;margin-bottom:1rem}
-.site-header .desc{max-width:640px;margin:0 auto;font-size:.9rem;color:rgba(255,255,255,.55);line-height:1.7}
+/* ── masthead ── */
+.masthead{
+  background:var(--ink);
+  color:var(--page);
+  padding:3rem 2rem 2.5rem;
+  position:relative;
+  overflow:hidden;
+}
+.masthead::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    -45deg,
+    rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,
+    transparent 0,transparent 50%
+  );
+  background-size:20px 20px;
+}
+.masthead-inner{max-width:860px;margin:0 auto;position:relative}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:.72rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(248,245,239,.5);
+  margin-bottom:1.2rem;
+}
+.masthead h1{
+  font-family:var(--sans);
+  font-size:clamp(2rem,5vw,3.4rem);
+  font-weight:800;
+  line-height:1.05;
+  letter-spacing:-.03em;
+  margin-bottom:1.2rem;
+}
+.masthead h1 em{font-style:normal;color:var(--gold)}
+.masthead-sub{
+  font-size:1.05rem;
+  color:rgba(248,245,239,.75);
+  max-width:600px;
+  line-height:1.65;
+  font-weight:300;
+}
 
-/* CHAPTER GROUPS */
-.chapter-group{margin-bottom:2rem}
-.group-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(20,184,166,.65);margin-bottom:.6rem;padding-left:.1rem}
-.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem}
+/* ── nav ── */
+.scen-nav{
+  background:var(--warm);
+  border-bottom:1.5px solid var(--rule-strong);
+  padding:.75rem 2rem;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.scen-nav-inner{
+  max-width:860px;
+  margin:0 auto;
+  display:flex;
+  gap:.5rem;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.nav-label{
+  font-family:var(--mono);
+  font-size:.68rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--rule-strong);
+  margin-right:.5rem;
+}
+.scen-btn{
+  border:1.5px solid var(--rule-strong);
+  background:transparent;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:.82rem;
+  font-weight:600;
+  padding:.45rem 1rem;
+  border-radius:4px;
+  cursor:pointer;
+  transition:.15s;
+}
+.scen-btn:hover{background:rgba(0,0,0,.06)}
+.scen-btn.active.s1{background:var(--s1);border-color:var(--s1);color:#fff}
+.scen-btn.active.s2{background:var(--s2);border-color:var(--s2);color:#fff}
+.scen-btn.active.s3{background:var(--s3);border-color:var(--s3);color:#fff}
+.scen-btn.compare.active{background:var(--teal);border-color:var(--teal);color:#fff}
 
-/* APP CARDS */
-.app-card{background:white;border-radius:.75rem;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s;box-shadow:0 2px 12px rgba(0,0,0,.15)}
-.app-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
-.app-card-head{padding:.9rem 1.1rem .7rem;display:flex;align-items:flex-start;gap:.7rem}
-.app-card-icon{font-size:1.5rem;line-height:1;flex-shrink:0;margin-top:.1rem}
-.app-card-title{font-size:1rem;font-weight:700;color:var(--navy);line-height:1.25;margin-bottom:.15rem}
-.app-card-type{font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
-.app-card-body{padding:0 1.1rem .9rem;flex:1}
-.app-card-desc{font-size:.82rem;color:var(--muted);line-height:1.6}
-.app-card-footer{padding:.55rem 1.1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.app-card-tag{font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;padding:.18rem .5rem;border-radius:.25rem}
-.tag-case{background:var(--teal-light);color:var(--teal-dark)}
-.tag-companion{background:var(--sky-light);color:var(--sky)}
-.tag-simulation{background:var(--amber-light);color:var(--amber-dark)}
-.tag-reference{background:var(--paper);color:var(--muted);border:1px solid var(--border)}
-.tag-orientation{background:var(--green-light);color:var(--green)}
-.app-card-arrow{font-size:.9rem;color:var(--teal-mid)}
+/* ── main layout ── */
+.shell{max-width:860px;margin:0 auto;padding:2.5rem 2rem 5rem}
 
-/* ACCENT BORDERS BY CHAPTER */
-.ch-orient .app-card-head{border-top:3px solid #0284c7}
-.ch-1 .app-card-head{border-top:3px solid #7c3aed}
-.ch-2 .app-card-head{border-top:3px solid #dc2626}
-.ch-3 .app-card-head{border-top:3px solid #0f766e}
-.ch-4 .app-card-head{border-top:3px solid #ca8a04}
-.ch-5 .app-card-head{border-top:3px solid #166534}
-.ch-6 .app-card-head{border-top:3px solid #0369a1}
-.ch-7 .app-card-head{border-top:3px solid #9333ea}
-.ch-8 .app-card-head{border-top:3px solid #92400e}
-.ch-9 .app-card-head{border-top:3px solid #0891b2}
-.ch-10 .app-card-head{border-top:3px solid #4f46e5}
-.ch-interlude .app-card-head{border-top:3px solid #0d5e57}
-.ch-rustbelt .app-card-head{border-top:3px solid #b45309}
-.ch-prologue .app-card-head{border-top:3px solid #6d28d9}
-.ch-11 .app-card-head{border-top:3px solid #0f766e}
-.ch-12 .app-card-head{border-top:3px solid #dc2626}
-.ch-13 .app-card-head{border-top:3px solid #1d4ed8}
-.ch-14 .app-card-head{border-top:3px solid #7c3aed}
-.ch-tools .app-card-head{border-top:3px solid #374151}
+/* ── hero stat row ── */
+.hero-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  background:var(--rule);
+  border:1px solid var(--rule);
+  border-radius:8px;
+  overflow:hidden;
+  margin-bottom:2.5rem;
+}
+.stat-cell{
+  background:var(--page);
+  padding:1.25rem 1rem;
+  text-align:center;
+}
+.stat-number{
+  font-family:var(--sans);
+  font-size:2.2rem;
+  font-weight:800;
+  line-height:1;
+  margin-bottom:.3rem;
+}
+.stat-label{
+  font-family:var(--mono);
+  font-size:.64rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--rule-strong);
+  line-height:1.4;
+}
 
-/* DIVIDER */
-.divider{height:1px;background:rgba(255,255,255,.07);margin:1.5rem 0}
+/* ── scenario header ── */
+.scen-header{
+  padding:1.5rem 1.75rem;
+  border-radius:8px;
+  margin-bottom:2rem;
+  border-left:5px solid;
+}
+.scen-header.s1{background:var(--s1l);border-color:var(--s1)}
+.scen-header.s2{background:var(--s2l);border-color:var(--s2)}
+.scen-header.s3{background:var(--s3l);border-color:var(--s3)}
+.scen-header h2{
+  font-family:var(--sans);
+  font-size:1.4rem;
+  font-weight:700;
+  margin-bottom:.5rem;
+}
+.scen-header p{
+  font-size:.95rem;
+  color:rgba(15,17,23,.75);
+  line-height:1.65;
+}
 
-/* PREDICTION CHAIN */
-.chain-bar{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.65rem;padding:1rem 1.25rem;margin-bottom:1.5rem}
-.chain-bar h3{font-size:.75rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:rgba(20,184,166,.65);margin-bottom:.65rem}
-.chain-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
-.chain-node{font-family:'JetBrains Mono',monospace;font-size:.65rem;background:rgba(255,255,255,.07);color:rgba(255,255,255,.65);padding:.22rem .55rem;border-radius:.3rem;white-space:nowrap}
-.chain-arrow{color:rgba(20,184,166,.5);font-size:.85rem}
+/* ── charts ── */
+.chart-block{margin-bottom:2.5rem}
+.chart-title{
+  font-family:var(--sans);
+  font-size:1rem;
+  font-weight:700;
+  margin-bottom:.3rem;
+}
+.chart-caption{
+  font-size:.85rem;
+  color:rgba(15,17,23,.6);
+  margin-bottom:1rem;
+  line-height:1.5;
+}
+.chart-wrap{
+  background:#fff;
+  border:1px solid var(--rule);
+  border-radius:8px;
+  padding:1.25rem;
+  position:relative;
+}
+.chart-annotation{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:.7rem;
+  background:var(--ink);
+  color:var(--page);
+  padding:.25rem .6rem;
+  border-radius:3px;
+  margin-top:.75rem;
+}
+
+/* ── interpretation ── */
+.interpret{
+  background:var(--warm);
+  border:1px solid var(--rule);
+  border-radius:8px;
+  padding:1.5rem;
+  margin-top:.75rem;
+  margin-bottom:2rem;
+}
+.interpret-label{
+  font-family:var(--mono);
+  font-size:.65rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--rule-strong);
+  margin-bottom:.6rem;
+}
+.interpret p{font-size:.92rem;line-height:1.7;color:var(--ink)}
+.interpret p+p{margin-top:.7rem}
+
+/* ── comparison view ── */
+.compare-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1rem;
+  margin-bottom:2rem;
+}
+.compare-card{
+  border:1px solid var(--rule);
+  border-radius:8px;
+  padding:1.25rem;
+  background:#fff;
+}
+.compare-card h3{
+  font-family:var(--sans);
+  font-size:.9rem;
+  font-weight:700;
+  margin-bottom:.75rem;
+  padding-bottom:.5rem;
+  border-bottom:2px solid;
+}
+.compare-card.s1 h3{border-color:var(--s1);color:var(--s1)}
+.compare-card.s2 h3{border-color:var(--s2);color:var(--s2)}
+.compare-card.s3 h3{border-color:var(--s3);color:var(--s3)}
+.compare-metric{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem}
+.compare-key{font-size:.78rem;color:rgba(15,17,23,.6);font-family:var(--mono)}
+.compare-val{font-family:var(--sans);font-size:1rem;font-weight:700}
+
+/* ── AI panel ── */
+.ai-panel{
+  background:var(--ink);
+  color:var(--page);
+  border-radius:8px;
+  padding:1.75rem;
+  margin-top:2.5rem;
+}
+.ai-panel h3{
+  font-family:var(--sans);
+  font-size:1.1rem;
+  font-weight:700;
+  margin-bottom:.5rem;
+  color:var(--gold);
+}
+.ai-panel p{font-size:.9rem;color:rgba(248,245,239,.7);margin-bottom:1rem;line-height:1.6}
+.ai-questions{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem}
+.ai-q{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  color:var(--page);
+  font-family:var(--serif);
+  font-size:.82rem;
+  padding:.5rem .9rem;
+  border-radius:4px;
+  cursor:pointer;
+  transition:.15s;
+  line-height:1.4;
+  text-align:left;
+}
+.ai-q:hover{background:rgba(255,255,255,.14)}
+.ai-input-row{display:flex;gap:.5rem}
+.ai-input{
+  flex:1;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:4px;
+  color:var(--page);
+  font-family:var(--serif);
+  font-size:.9rem;
+  padding:.65rem 1rem;
+  outline:none;
+  transition:.15s;
+}
+.ai-input:focus{border-color:rgba(201,168,76,.6)}
+.ai-input::placeholder{color:rgba(248,245,239,.35)}
+.ai-send{
+  background:var(--gold);
+  border:none;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:.85rem;
+  font-weight:700;
+  padding:.65rem 1.25rem;
+  border-radius:4px;
+  cursor:pointer;
+  transition:.15s;
+  white-space:nowrap;
+}
+.ai-send:hover{background:#d4a830}
+.ai-send:disabled{opacity:.5;cursor:not-allowed}
+.ai-response{
+  margin-top:1.25rem;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:6px;
+  padding:1.25rem;
+  font-size:.88rem;
+  line-height:1.75;
+  display:none;
+  white-space:pre-wrap;
+}
+.ai-response.visible{display:block}
+.ai-loading{color:var(--gold);font-family:var(--mono);font-size:.8rem}
+
+/* ── quiz ── */
+.quiz-block{
+  border:1.5px solid var(--rule-strong);
+  border-radius:8px;
+  padding:1.5rem;
+  margin-top:2.5rem;
+  background:#fff;
+}
+.quiz-title{
+  font-family:var(--sans);
+  font-size:1rem;
+  font-weight:700;
+  margin-bottom:1.25rem;
+  padding-bottom:.75rem;
+  border-bottom:1px solid var(--rule);
+}
+.quiz-q{margin-bottom:1.5rem}
+.quiz-q-text{font-size:.95rem;font-weight:600;margin-bottom:.75rem}
+.quiz-options{display:flex;flex-direction:column;gap:.5rem}
+.quiz-opt{
+  border:1.5px solid var(--rule);
+  background:transparent;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:.88rem;
+  padding:.7rem 1rem;
+  border-radius:6px;
+  cursor:pointer;
+  text-align:left;
+  line-height:1.45;
+  transition:.15s;
+}
+.quiz-opt:hover:not(:disabled){background:var(--warm);border-color:var(--rule-strong)}
+.quiz-opt.correct{background:rgba(39,174,96,.12);border-color:var(--s3);color:#1a6b3a}
+.quiz-opt.wrong{background:rgba(192,57,43,.08);border-color:var(--s1)}
+.quiz-opt:disabled{cursor:not-allowed}
+.quiz-feedback{font-size:.85rem;margin-top:.5rem;font-style:italic;color:rgba(15,17,23,.65)}
+
+/* ── section divider ── */
+.divider{
+  border:none;
+  border-top:1px solid var(--rule);
+  margin:2.5rem 0;
+}
+
+/* ── hidden/visible ── */
+.panel{display:none}
+.panel.active{display:block}
+
+@media(max-width:600px){
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .compare-grid{grid-template-columns:1fr}
+  .ai-input-row{flex-direction:column}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
 
-<div class="site-header">
-  <div class="label">Saint Petersburg College &middot; Ethics Institute</div>
-  <h1>Ethics Beyond Boundaries</h1>
-  <div class="sub">Interactive App Suite &middot; Dr. Robert Mertzman</div>
-  <div class="desc">A complete set of simulation apps, case explorers, and companion reading tools for the EBB course. Each app connects to the UCP simulation engine and stores journal predictions for the next chapter.</div>
-</div>
-
-<!-- PREDICTION CHAIN -->
-<div class="chain-bar">
-  <h3>Prediction Chain &mdash; Journal Q5 flows chapter to chapter</h3>
-  <div class="chain-row">
-    <span class="chain-node">Orientation → orient_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Ch2 → ch2_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Ch3 → ch3_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Ch4 → ch4_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Ch5 → ch5_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Ch6 → ch6_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Ch7 → ch7_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Ch8 → ch8_cq5</span>
-    <span class="chain-arrow">→</span>
-    <span class="chain-node">Rust Belt → rust_belt_cq5</span>
+<!-- masthead -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="eyebrow">EBB · Economic Ethics · Simulation Lab</div>
+    <h1>What Happens to <em>Workers</em><br>When Institutions Extract?</h1>
+    <p class="masthead-sub">Three institutional designs. Two hundred workers. Run by a real economic simulation. Watch what the data says about nursing homes, private prisons, and the ethics of extraction.</p>
   </div>
-</div>
+</header>
 
-<!-- ORIENTATION -->
-<div class="chapter-group ch-orient">
-  <div class="group-label">Orientation</div>
-  <div class="app-grid">
-    <a class="app-card" href="ebb-orientation-app.html">
-      <div class="app-card-head"><div class="app-card-icon">🗺️</div><div><div class="app-card-title">Course Orientation</div><div class="app-card-type">Interactive Map</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The watershed model, PRF Peak Calculator, course arc, and Journal Q4 prediction for Chapter 2. Start here before Chapter 1.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-orientation">Orientation</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="day1-orientation.html">
-      <div class="app-card-head"><div class="app-card-icon">📋</div><div><div class="app-card-title">Day 1 Orientation</div><div class="app-card-type">First Class</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">First-day introduction to the course framework, PRF concept, and OS1/OS2 distinction.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-orientation">Day 1</span><span class="app-card-arrow">→</span></div>
-    </a>
+<!-- sticky scenario nav -->
+<nav class="scen-nav">
+  <div class="scen-nav-inner">
+    <span class="nav-label">Explore</span>
+    <button class="scen-btn s1 active" onclick="showPanel('s1')">① Business as Usual</button>
+    <button class="scen-btn s2" onclick="showPanel('s2')">② Welfare State</button>
+    <button class="scen-btn s3" onclick="showPanel('s3')">③ Structural Change</button>
+    <button class="scen-btn compare" onclick="showPanel('compare')">All Three</button>
   </div>
-</div>
+</nav>
 
-<!-- CHAPTER 1 -->
-<div class="chapter-group ch-1">
-  <div class="group-label">Chapter 1 &mdash; The PRF</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter1-lens-app.html">
-      <div class="app-card-head"><div class="app-card-icon">🔭</div><div><div class="app-card-title">Your Interpretive Lens</div><div class="app-card-type">Companion App</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Build your Phenomenological Reference Framework. How your PRF formed, what it makes visible, and what it makes hard to see.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Companion</span><span class="app-card-arrow">→</span></div>
-    </a>
+<main class="shell">
+
+<!-- ══ SCENARIO 1 ══ -->
+<div class="panel active" id="panel-s1">
+
+  <div class="scen-header s1">
+    <h2>① Business as Usual — The Extraction Model</h2>
+    <p>The institution pushes workers hard and creates bureaucratic friction that blocks their best efforts. Think of a nursing home chain or a private prison operator focused on quarterly returns. Workers accumulate psychological harm. The costs are invisible on the institution's balance sheet — but visible in the public health system, in emergency rooms, in workers' families.</p>
   </div>
-</div>
 
-<!-- CHAPTER 2 -->
-<div class="chapter-group ch-2">
-  <div class="group-label">Chapter 2 &mdash; The Challenger Disaster</div>
-  <div class="app-grid">
-    <a class="app-card" href="challenger-case-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">🚀</div><div><div class="app-card-title">Challenger Case Explorer</div><div class="app-card-type">Case Explorer + Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Roger Boisjoly and the suppression gap. Eight tabs: Discovery through Aftermath. UCP Simulation: Config A (Thiokol) vs. Config B (protected channel). Clickable metric explanations.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Explorer</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="chapter2-telescope-app.html">
-      <div class="app-card-head"><div class="app-card-icon">📡</div><div><div class="app-card-title">Chapter 2 Companion</div><div class="app-card-type">Companion App</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The suppression gap concept, institutional architecture, and the ethics of speaking truth to power.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Companion</span><span class="app-card-arrow">→</span></div>
-    </a>
+  <div class="hero-stats" id="stats-s1"></div>
+
+  <div class="chart-block">
+    <div class="chart-title">How quickly do workers burn out?</div>
+    <div class="chart-caption">This chart tracks worker count (left axis) and their ability to stay present and engaged at work (right axis) over time. Notice how fast both collapse.</div>
+    <div class="chart-wrap"><canvas id="chart-s1-workers" height="220"></canvas></div>
+    <span class="chart-annotation">17% of workers remain by the end. Present Integration (ability to focus and engage) falls from 0.85 to 0.09 — near zero.</span>
   </div>
-</div>
 
-<!-- CHAPTER 3 -->
-<div class="chapter-group ch-3">
-  <div class="group-label">Chapter 3 &mdash; Father Hanna</div>
-  <div class="app-grid">
-    <a class="app-card" href="hanna-case-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">⛪</div><div><div class="app-card-title">Hanna Case Explorer</div><div class="app-card-type">Case Explorer + Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Father Saad Sirop Hanna — maintaining identity under maximum institutional entropy. Identity Kernel, BioBond, and the limits of individual courage.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Explorer</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="chapter3-commonwealth-app.html">
-      <div class="app-card-head"><div class="app-card-icon">🏛️</div><div><div class="app-card-title">Chapter 3 Companion</div><div class="app-card-type">Companion App</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Building commonwealth across difference. The conditions for ethical functioning under extreme constraint.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Companion</span><span class="app-card-arrow">→</span></div>
-    </a>
+  <div class="interpret">
+    <div class="interpret-label">What this means ethically</div>
+    <p>The extraction model does not randomly harm some workers. It systematically destroys the capacity for present engagement — the ability to actually do skilled, caring work — in everyone. A nursing home aide who has lost Present Integration cannot provide the attentive care that residents need, not because she stopped caring, but because the institutional structure depleted the neurological and psychological substrate of care.</p>
+    <p>Kant's humanity formula asks whether persons are being treated as ends in themselves. When an institution's design systematically degrades the capacities required for workers to be genuine agents — not just once but as a predictable structural outcome — the answer is clear.</p>
   </div>
-</div>
 
-<!-- CHAPTER 4 -->
-<div class="chapter-group ch-4">
-  <div class="group-label">Chapter 4 &mdash; Wangari Maathai</div>
-  <div class="app-grid">
-    <a class="app-card" href="maathai-case-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">🌳</div><div><div class="app-card-title">Maathai Case Explorer</div><div class="app-card-type">Case Explorer + Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Wangari Maathai and the Green Belt Movement. Coordination architecture, OS2 Bridge, and building institutions that outlast their founders.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Explorer</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="chapter4-maathai-app.html">
-      <div class="app-card-head"><div class="app-card-icon">🌿</div><div><div class="app-card-title">Chapter 4 Companion</div><div class="app-card-type">Companion App</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Institutional design, capability-based coordination, and the ethics of building structures that distribute agency.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Companion</span><span class="app-card-arrow">→</span></div>
-    </a>
+  <div class="chart-block">
+    <div class="chart-title">Who pays for the damage?</div>
+    <div class="chart-caption">The public deficit tracks what taxpayers spend repairing the harm the institution generates: healthcare costs, disability claims, social services, replacement workforce training. This is the externalized cost — real spending that never appears on the institution's profit-and-loss statement.</div>
+    <div class="chart-wrap"><canvas id="chart-s1-deficit" height="200"></canvas></div>
+    <span class="chart-annotation">The institution generates harm it does not pay for. Taxpayers cover the difference.</span>
   </div>
-</div>
 
-<!-- CHAPTER 5 -->
-<div class="chapter-group ch-5">
-  <div class="group-label">Chapter 5 &mdash; Nelson Mandela</div>
-  <div class="app-grid">
-    <a class="app-card" href="mandela-case-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">⚖️</div><div><div class="app-card-title">Mandela Case Explorer</div><div class="app-card-type">Case Explorer + Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Nelson Mandela and the TRC. Three simulation runs: the TRC design, the fragmentation counterfactual, and the vulnerable population test.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Explorer</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="chapter5-mandela-app.html">
-      <div class="app-card-head"><div class="app-card-icon">🕊️</div><div><div class="app-card-title">Chapter 5 Companion</div><div class="app-card-type">Companion App</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Truth, reconciliation, and institutional design across radical difference. The TRC as a coordination architecture problem.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Companion</span><span class="app-card-arrow">→</span></div>
-    </a>
+  <div class="interpret">
+    <div class="interpret-label">The consequentialist view</div>
+    <p>Consequentialism asks: what are the actual downstream effects, and who bears the costs? In the extraction model, costs are systematically routed from the institution to the public. The institution's accounting looks efficient. The real accounting — including emergency room visits, mental health treatment, workforce dropout, family disruption — tells a different story. This is not a market failure. It is a market design: the incentive structure rewards externalizing harm onto those with the least power to resist it.</p>
   </div>
+
 </div>
 
-<!-- CHAPTER 6 -->
-<div class="chapter-group ch-6">
-  <div class="group-label">Chapter 6 &mdash; Tim Palmer</div>
-  <div class="app-grid">
-    <a class="app-card" href="palmer-case-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">🌀</div><div><div class="app-card-title">Palmer Case Explorer</div><div class="app-card-type">Case Explorer + Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Tim Palmer and ensemble forecasting. Single-model vs. ensemble architecture. The moral argument for honest uncertainty. Three simulation runs.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Explorer</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="chapter6-companion.html">
-      <div class="app-card-head"><div class="app-card-icon">📊</div><div><div class="app-card-title">Chapter 6 Companion</div><div class="app-card-type">Companion App</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The primacy of doubt. Chaos, uncertainty, and the ethics of what forecasting institutions owe the people who depend on them.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Companion</span><span class="app-card-arrow">→</span></div>
-    </a>
+<!-- ══ SCENARIO 2 ══ -->
+<div class="panel" id="panel-s2">
+
+  <div class="scen-header s2">
+    <h2>② The Welfare State Response — Treating the Symptom</h2>
+    <p>We raise taxes on institutions and use the revenue to fund repair programs: healthcare subsidies, mental health services, workforce support. The institution continues operating exactly as before — same extraction pressure, same bureaucratic friction. But now there is a safety net. This is the political logic behind most regulatory responses to institutional harm.</p>
   </div>
-</div>
 
-<!-- CHAPTER 7 -->
-<div class="chapter-group ch-7">
-  <div class="group-label">Chapter 7 &mdash; Doyne Farmer</div>
-  <div class="app-grid">
-    <a class="app-card" href="farmer-case-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">🏭</div><div><div class="app-card-title">Farmer Case Explorer</div><div class="app-card-type">Case Explorer + Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Doyne Farmer and agent-based economics. Three runs: Representative Agent, Heterogeneous Agents, Rawlsian Test. The COVID prediction and what standard models missed.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Explorer</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="chapter7-farmer-app.html">
-      <div class="app-card-head"><div class="app-card-icon">🔬</div><div><div class="app-card-title">Chapter 7 Companion</div><div class="app-card-type">Companion App</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The invisible people. Representative agent error, heterogeneous modeling, social block fields, and the Rawlsian test. Your field map exercise.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Companion</span><span class="app-card-arrow">→</span></div>
-    </a>
+  <div class="hero-stats" id="stats-s2"></div>
+
+  <div class="chart-block">
+    <div class="chart-title">Does the safety net protect workers?</div>
+    <div class="chart-caption">Compare worker retention and engagement between Scenario 1 (Business as Usual) and Scenario 2 (Welfare State). The dotted line shows what the welfare state achieves.</div>
+    <div class="chart-wrap"><canvas id="chart-s2-compare" height="220"></canvas></div>
+    <span class="chart-annotation">Welfare state: 16% of workers remain — barely different from 17% without it. The safety net does not change the underlying mechanism.</span>
   </div>
-</div>
 
-<!-- CHAPTER 8 -->
-<div class="chapter-group ch-8">
-  <div class="group-label">Chapter 8 &mdash; The Simulated History of Ethics</div>
-  <div class="app-grid">
-    <a class="app-card" href="ethical-theories-app.html">
-      <div class="app-card-head"><div class="app-card-icon">🏛️</div><div><div class="app-card-title">Ethical Theories App</div><div class="app-card-type">Nine Stations + Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">What were the traditions actually measuring? Nine stations from Socrates to Existentialism. Conditions Cascade visualization. Composite Run with all nine conditions. The Complex PRF.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Simulation</span><span class="app-card-arrow">→</span></div>
-    </a>
+  <div class="interpret">
+    <div class="interpret-label">The Tums Strategy</div>
+    <p>If you have chronic acid reflux, you can take antacids every day and manage the symptoms. You will feel slightly better. But if you do not change what you eat, the underlying condition continues and may worsen. The welfare state response to institutional harm works similarly. It funds repair without changing the mechanism generating the damage. Workers are slightly better supported as they burn out. They still burn out.</p>
+    <p>The simulation shows something worse: the welfare state actually generates a larger public deficit than the Business as Usual scenario because it taxes more but does not reduce the repair costs — the same harm keeps being generated at the same rate.</p>
   </div>
-</div>
 
-<!-- CHAPTER 9 -->
-<div class="chapter-group ch-9">
-  <div class="group-label">Chapter 9 &mdash; The World Values Map</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter9-wvm-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127758;</div><div><div class="app-card-title">Where Are You Standing?</div><div class="app-card-type">Cultural PRF &middot; Cross-Cultural Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The World Values Map applied to the simulation. Two axes, five worldview categories, the thermodynamic logic of why values shift with conditions, IPS-WVM connection, and AMC forward pointer.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Simulation</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="chart-block">
+    <div class="chart-title">The Welfare State makes the deficit worse</div>
+    <div class="chart-caption">Higher taxes collect more revenue — but the harm keeps being generated at the same rate, so repair costs remain equally high. The deficit diverges sharply from Scenario 1 before both stabilize when firms go bankrupt.</div>
+    <div class="chart-wrap"><canvas id="chart-s2-deficit" height="200"></canvas></div>
+    <span class="chart-annotation">S2 deficit peaks at –474 (vs –149 for S1) before firms collapse. More spending, same damage.</span>
   </div>
-</div>
 
-<!-- CHAPTER 10 -->
-<div class="chapter-group ch-10">
-  <div class="group-label">Chapter 10 &mdash; The Social Contract</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter10-social-contract-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#x2696;&#xFE0F;</div><div><div class="app-card-title">Who Gave Them the Right?</div><div class="app-card-type">Three Architectures &middot; IPS Profiles &middot; Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Hobbes, Locke, and Rousseau as institutional architectures mapped to IPS parameters. Characteristic failure mode per architecture. CPG five criteria as IPS requirements. The Hybrid Citizen framework.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Simulation</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="interpret">
+    <div class="interpret-label">What social contract theory says</div>
+    <p>Social contract theory — particularly Rawls's account of fair institutional arrangements — asks whether the people inside a system could reasonably endorse it from behind a veil of ignorance, not knowing which position they would occupy. No reasonable person, not knowing whether they would be a nursing home worker or a shareholder, would endorse an arrangement that systematically destroys workers' capacities while requiring taxpayers to subsidize the damage. The welfare state version of this arrangement is only marginally more defensible: it adds a more expensive subsidy while leaving the underlying arrangement intact.</p>
   </div>
+
 </div>
 
-<!-- INTERLUDE -->
-<div class="chapter-group ch-interlude">
-  <div class="group-label">Interlude &mdash; Ethics of the Framework</div>
-  <div class="app-grid">
-    <a class="app-card" href="interlude-ethics-framework-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#9651;</div><div><div class="app-card-title">Ethics of the Framework</div><div class="app-card-type">Agency Conditions Principle &middot; Bridge Reading</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The normative core stated in full: ACP, entropy-exporting institutions, Coherence-Preserving Governance, temporal commons, and the six-question diagnostic for the applied sequence ahead.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Reading</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+<!-- ══ SCENARIO 3 ══ -->
+<div class="panel" id="panel-s3">
+
+  <div class="scen-header s3">
+    <h2>③ Structural Change — The Biobond Model</h2>
+    <p>Now something different happens. The institution's cost of borrowing money rises when its workers are suffering — this is the Biobond mechanism. Worker harm creates a financial liability that appears in the institution's cost of capital. Simultaneously, the institution reduces extraction pressure and bureaucratic friction. The financial structure itself creates an incentive to not harm workers.</p>
   </div>
-</div>
 
-<!-- RUST BELT -->
-<div class="chapter-group ch-rustbelt">
-  <div class="group-label">Rust Belt Case Study &mdash; Nine Lenses Applied</div>
-  <div class="app-grid">
-    <a class="app-card" href="rust-belt-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127981;</div><div><div class="app-card-title">Rust Belt &mdash; Nine Ethical Lenses</div><div class="app-card-type">Case Study + Three-Part Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The Rust Belt collapse examined through all nine ethical traditions simultaneously. Pre-collapse, collapse, and current state metrics. The synthesis tab shows what no single lens can see alone.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Study</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="hero-stats" id="stats-s3"></div>
+
+  <div class="chart-block">
+    <div class="chart-title">What happens to workers under structural change?</div>
+    <div class="chart-caption">Worker count and Present Integration (ability to engage and do skilled work) under the structural change model. This is the same 200 workers as Scenarios 1 and 2.</div>
+    <div class="chart-wrap"><canvas id="chart-s3-workers" height="220"></canvas></div>
+    <span class="chart-annotation">100% of workers remain throughout. Present Integration stays above 0.81 — nearly the starting level.</span>
   </div>
-</div>
 
-<div class="divider"></div>
-
-<!-- APPLIED SEQUENCE -->
-<div class="chapter-group ch-prologue">
-  <div class="group-label">Prologue &mdash; The Pattern Beneath Ethics</div>
-  <div class="app-grid">
-    <a class="app-card" href="prologue-pattern-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127381;</div><div><div class="app-card-title">The Pattern Beneath Ethics</div><div class="app-card-type">Scale-Free Laws &middot; Agential Hijacking &middot; Course Map</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The scale-invariant mechanism underlying every chapter: parasitic overwrite operating identically at biological, psychological, institutional, and civilizational scales. The mantis case. Course architecture revealed.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-companion">Prologue</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="interpret">
+    <div class="interpret-label">Why this is not utopian</div>
+    <p>The structural change scenario does not assume that institutions become virtuous. It assumes that the financial structure creates incentives that align institutional self-interest with worker wellbeing. The institution reduces extraction not because it cares about workers but because harming workers has become financially costly. This is the core argument of the Biobond financial instrument: make the externalized costs of workforce harm visible on the institution's balance sheet, and market mechanisms will do some of the work that regulation struggles to do.</p>
+    <p>Care ethics would note that this is still insufficient — treating workers as ends in themselves, not merely as cost factors, requires more than financial incentive alignment. But as a structural intervention, it represents a genuine change in the mechanism rather than a subsidy for the symptom.</p>
   </div>
-</div>
 
-<div class="chapter-group ch-11">
-  <div class="group-label">Chapter 11 &mdash; Economic Systems (Applied Sequence &middot; Movement 1)</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter11-economic-systems-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127970;</div><div><div class="app-card-title">What the Economy Does to Coherent Agency</div><div class="app-card-type">IPS Diagnostic &middot; BioBond &middot; Peterson et al. 2025</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The False Choice thesis. Nine fairness dimensions as IPS parameters. Florida nursing home ownership archetypes (Peterson/AARP 2025 &amp; CMS data). PE acquisition trajectory 2019&ndash;2024. BioBond instruments. True Solvency Accounting. Three economic architecture simulation configs.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Simulation + IPS</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="chart-block">
+    <div class="chart-title">What does the public pay in Scenario 3?</div>
+    <div class="chart-caption">In the structural change model, the public initially pays for the transition — institutions face higher capital costs as they restructure. But repair costs fall dramatically because harm is being generated at a much lower rate.</div>
+    <div class="chart-wrap"><canvas id="chart-s3-deficit" height="200"></canvas></div>
+    <span class="chart-annotation">S3 public deficit stabilizes at +155 — positive, meaning the system eventually runs a surplus as harm costs fall.</span>
   </div>
-</div>
 
-<div class="chapter-group ch-12">
-  <div class="group-label">Chapter 12 &mdash; Governance Systems (Applied Sequence &middot; Movement 2)</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter12-governance-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127981;</div><div><div class="app-card-title">Governance Systems and the Routing Quality Gap</div><div class="app-card-type">Four Configs &middot; Boisjoly T4 &middot; Type 1/Type 2 Failure</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Procedural vs. substantive legitimacy. Config A (Captured), B (Coherence-Preserving), C (Reform Transition), D (Boisjoly T4: agent FHRI 82, absorbed 67.7 pts). Type 1 vs. Type 2 routing quality failure distinction.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Simulation</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="interpret">
+    <div class="interpret-label">The ethical argument for structural change</div>
+    <p>The five ethical frameworks the course has covered converge on structural change more than on either the extraction model or the welfare state patch. Virtue ethics: workers in Scenario 3 can actually develop and exercise the capacities that make skilled care possible. Kantian ethics: the institutional design no longer systematically treats workers merely as extraction vehicles. Consequentialism: the aggregate harm is vastly lower, and the costs do not burden those with least power. Care ethics: the conditions for genuine responsiveness to the vulnerable — residents, inmates, clients — are preserved. Social contract: reasonable persons would endorse an arrangement where the institution bears the costs of the harm it generates.</p>
+    <p>This convergence across frameworks is what SAGE analysis is designed to identify. When multiple ethical traditions support the same practical direction, that convergence is itself significant evidence.</p>
   </div>
+
 </div>
 
-<div class="chapter-group ch-13">
-  <div class="group-label">Chapter 13 &mdash; Information Systems (Applied Sequence &middot; Movement 3)</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter13-infosystems-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#128225;</div><div><div class="app-card-title">Information Systems and the Second Filter</div><div class="app-card-type">Web of Acquisition &middot; &sigma;/&mu; Filter Asymmetry &middot; AI Ethics</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The filter upstream of governance. CSER Cambridge web of acquisition framework. IPS mechanism of filter asymmetry: &sigma; (morphic residue) and &mu; (incentive misalignment). Why 80% structural improvement is the honest result. Three simulation configs with IPS profiles.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Simulation</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+<!-- ══ COMPARISON ══ -->
+<div class="panel" id="panel-compare">
+
+  <div class="scen-header" style="background:rgba(13,94,87,.08);border-left:5px solid var(--teal)">
+    <h2>All Three Scenarios — Side by Side</h2>
+    <p>The most important chart is the one that shows what happens to workers under each institutional design. 200 workers start all three scenarios in identical conditions. The only thing that differs is the structure of the institution.</p>
   </div>
-</div>
 
-<div class="chapter-group ch-14">
-  <div class="group-label">Chapter 14 &mdash; Existential Risk (Applied Sequence &middot; Movement 4)</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter14-existential-risk-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127759;</div><div><div class="app-card-title">Existential Risk, Leverage, and the AMC</div><div class="app-card-type">IPS Field Profiles &middot; Iron Cage &middot; T1/T2 Counterfactuals</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Meadows leverage hierarchy. Iron Cage (high-&sigma;/&rho;) and Obsolescence Trap (high-&epsilon;/&mu;) failure modes. Four-institution IPS field profiles. Trust vector trajectory. T1 vs. T2 intervention types. Paris Agreement analysis. AMC as field architecture.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Multi-Institutional Field</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="chart-block">
+    <div class="chart-title">The Worker Retention Gap</div>
+    <div class="chart-caption">How many of the original 200 workers remain over time under each institutional design. This is the core result.</div>
+    <div class="chart-wrap"><canvas id="chart-comp-workers" height="240"></canvas></div>
   </div>
-</div>
 
-<!-- INTERLUDE PARASITE -->
-<div class="chapter-group" style="border-left:3px solid #f87171">
-  <div class="group-label" style="color:#f87171">Interlude &mdash; The Parasite Revealed (Bridge: Ch10 &rarr; Ch11)</div>
-  <div class="app-grid">
-    <a class="app-card" href="interlude-parasite-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#128027;</div><div><div class="app-card-title">The Parasite Revealed</div><div class="app-card-type">Hairworm Biology &middot; The Mechanism &middot; Five Parameters &middot; Wall-E &middot; The Bridge</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The hinge between individual ethics and systems ethics. Hairworm/mantis mechanism. Intercept, consume, replace. Five IPS parameters introduced through what students already see. Wall-E as civilizational-scale &epsilon;. The moral outrage has a target now.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Bridge Module</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="chart-block">
+    <div class="chart-title">Present Integration — Can Workers Actually Do Their Jobs?</div>
+    <div class="chart-caption">Present Integration measures the capacity for focused, attentive engagement at work. For a nursing home aide, this is what makes genuine care possible. For a teacher, it is what makes genuine instruction possible.</div>
+    <div class="chart-wrap"><canvas id="chart-comp-pi" height="220"></canvas></div>
+    <span class="chart-annotation">S1 and S2 crash to 0.09. S3 stabilizes at 0.81. The institutional structure determines the difference — not individual workers' character or effort.</span>
   </div>
-</div>
 
-<!-- CH11 ECONOMICS RUST BELT -->
-<div class="chapter-group" style="border-left:3px solid #4ade80">
-  <div class="group-label" style="color:#4ade80">Chapter 11 &mdash; Economics, the Rust Belt &amp; the Parasite</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter11-economics-rustbelt-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127981;</div><div><div class="app-card-title">Economics &amp; the Rust Belt</div><div class="app-card-type">Three-Era FHRI_max Trajectory &middot; Wall-E &middot; Sorry to Bother You &middot; Maathai Response</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Computable structural event: 1960/1985/2010 FHRI_max trajectory for Rust Belt communities. The acquisition wave as the named responsible party. Wall-E as civilizational-scale economics. Sorry to Bother You as the career-trap version. The Evergreen Cooperatives as the plant in the boot.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Economics</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="chart-block">
+    <div class="chart-title">The Public Cost of Institutional Harm</div>
+    <div class="chart-caption">What taxpayers spend repairing damage that institutions generate. Negative numbers mean the public is spending more than it collects in tax revenue. The Welfare State (orange) spends more than Business as Usual because it collects more in taxes but does not reduce the harm being generated.</div>
+    <div class="chart-wrap"><canvas id="chart-comp-deficit" height="220"></canvas></div>
   </div>
-</div>
 
-<!-- CH12 GOVERNANCE -->
-<div class="chapter-group" style="border-left:3px solid #a78bfa">
-  <div class="group-label" style="color:#a78bfa">Chapter 12 &mdash; Governance &amp; the Three Failure Modes</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter12-governance-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#9939;</div><div><div class="app-card-title">Governance &amp; the Three Failure Modes</div><div class="app-card-type">Iron Cage &middot; Obsolescence Trap &middot; Regulatory Capture &middot; Governance Classifier</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Three structural failure modes with science fiction prior art: Agent Smith (Capture), White Bear (Capture with spectacle), The Evitable Conflict (Obsolescence + Iron Cage). Interactive governance classifier for real regulatory programs. Oracle obligation framing.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Governance</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <hr class="divider"/>
+
+  <div class="compare-grid">
+    <div class="compare-card s1">
+      <h3>① Business as Usual</h3>
+      <div class="compare-metric"><span class="compare-key">Workers remaining</span><span class="compare-val" style="color:var(--s1)">17%</span></div>
+      <div class="compare-metric"><span class="compare-key">Present Integration</span><span class="compare-val">0.09</span></div>
+      <div class="compare-metric"><span class="compare-key">Peak public deficit</span><span class="compare-val">–149</span></div>
+      <div class="compare-metric"><span class="compare-key">Final deficit</span><span class="compare-val">–70</span></div>
+    </div>
+    <div class="compare-card s2">
+      <h3>② Welfare State</h3>
+      <div class="compare-metric"><span class="compare-key">Workers remaining</span><span class="compare-val" style="color:var(--s2)">16%</span></div>
+      <div class="compare-metric"><span class="compare-key">Present Integration</span><span class="compare-val">0.09</span></div>
+      <div class="compare-metric"><span class="compare-key">Peak public deficit</span><span class="compare-val">–474</span></div>
+      <div class="compare-metric"><span class="compare-key">Final deficit</span><span class="compare-val">–184</span></div>
+    </div>
+    <div class="compare-card s3">
+      <h3>③ Structural Change</h3>
+      <div class="compare-metric"><span class="compare-key">Workers remaining</span><span class="compare-val" style="color:var(--s3)">100%</span></div>
+      <div class="compare-metric"><span class="compare-key">Present Integration</span><span class="compare-val">0.81</span></div>
+      <div class="compare-metric"><span class="compare-key">Peak public cost</span><span class="compare-val">+168</span></div>
+      <div class="compare-metric"><span class="compare-key">Final balance</span><span class="compare-val" style="color:var(--s3)">+155</span></div>
+    </div>
   </div>
-</div>
 
-<!-- CH13 INFORMATION -->
-<div class="chapter-group" style="border-left:3px solid #60a5fa">
-  <div class="group-label" style="color:#60a5fa">Chapter 13 &mdash; Information Systems &amp; The Filter</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter13-information-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#128202;</div><div><div class="app-card-title">Information Systems &amp; The Filter</div><div class="app-card-type">Filter Simulator &middot; Triadic Hack &middot; Nosedive &middot; Entire History of You &middot; Boisjoly Test</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Interactive filter asymmetry simulator: tune &sigma;/&mu;/&rho; and watch the signal get absorbed. Boisjoly Preset shows the Challenger configuration. Triadic Hack mapped across HHVBP, Nosedive, Herbie, and Challenger. The second filter problem made computable.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Information</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="interpret">
+    <div class="interpret-label">The structural ethics argument</div>
+    <p>The simulation does not tell you what to think. It shows you what the structural logic produces. The extraction model generates harm at a predictable rate. The welfare state patches the harm at a higher cost without reducing it. The structural change model aligns financial incentives with the conditions required for workers to actually do their jobs well.</p>
+    <p>None of this settles the ethical question — it illuminates it. Care ethics would note that even Scenario 3 treats workers primarily as cost factors rather than as persons with irreducible dignity and relational obligations. The SAGE analysis the course asks you to do would apply all five frameworks to a specific institutional situation and ask: where do they converge, where do they diverge, and what does the pattern of convergence suggest about what structural change is ethically required?</p>
   </div>
+
 </div>
 
-<div class="chapter-group" style="border-left:3px solid #a78bfa">
-  <div class="group-label" style="color:#a78bfa">Cultural Resonance Module &mdash; Science Fiction as Structural Ethics Laboratory</div>
-  <div class="app-grid">
-    <a class="app-card" href="scifi-ethics-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#127916;</div><div><div class="app-card-title">Science Fiction Ethics Lab</div><div class="app-card-type">I, Robot &middot; The Matrix &middot; Wall-E &middot; Ex Machina &middot; Parasite &middot; Black Mirror</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Popular culture texts as prior art for institutional parasitism theory. IPS parameter mapping across nine works. The Three Laws as T2 intervention. The Triadic Hack and Dark Coherence across the canon. 75-minute class design. Five journal prompts connecting narrative to lived structural experience.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Cultural Bridge</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+<!-- ══ AI PANEL ══ -->
+<div class="ai-panel">
+  <h3>Ask About What You're Seeing</h3>
+  <p>Ask a question about the simulation, what it reveals about real institutions like nursing homes or private prisons, or how the ethical frameworks in this course apply to what the data shows.</p>
+  <div class="ai-questions">
+    <button class="ai-q" onclick="askPreset(this)">What does this simulation tell us about nursing home workers specifically?</button>
+    <button class="ai-q" onclick="askPreset(this)">Why does the Welfare State make things worse, not better?</button>
+    <button class="ai-q" onclick="askPreset(this)">How does care ethics see what happened to workers in Scenario 1?</button>
+    <button class="ai-q" onclick="askPreset(this)">What would Kant say about an institution that produces this outcome?</button>
+    <button class="ai-q" onclick="askPreset(this)">How does this connect to the suppression gap in my own Field Scan?</button>
   </div>
-</div>
-
-<div class="chapter-group ch-14">
-  <div class="group-label">Chapter 15 &mdash; The Visible Parasite (Applied Sequence &middot; Synthesis)</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter15-visible-parasite-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#128302;</div><div><div class="app-card-title">The Visible Parasite</div><div class="app-card-type">SAGE Analysis &middot; Capability Tool &middot; T1/T2 Classifier</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">What 12,239 agencies confirmed about institutional parasitism. Scale explorer from individual to civilization. SAGE applied to the nursing home structural scenario. Capability-based ethics tool: what you can actually do from where you are. T1/T2 classifier for any proposed action.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Synthesis</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-input" type="text" placeholder="Type your own question…" onkeydown="if(event.key==='Enter')sendAI()"/>
+    <button class="ai-send" id="ai-btn" onclick="sendAI()">Ask →</button>
   </div>
+  <div class="ai-response" id="ai-response"></div>
 </div>
 
-<div class="divider"></div>
+<!-- ══ QUIZ ══ -->
+<div class="quiz-block">
+  <div class="quiz-title">Check Your Understanding</div>
 
-<!-- PSAGE DEEP DIVE -->
-<div class="chapter-group" style="border-left:3px solid #14b8a6">
-  <div class="group-label" style="color:#14b8a6">P-SAGE &mdash; Professional Ethical Analysis Protocol (Deep Dive)</div>
-  <div class="app-grid">
-    <a class="app-card" href="psage-deep-dive-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#128302;</div><div><div class="app-card-title">P-SAGE Deep Dive</div><div class="app-card-type">Perception + SAGE &middot; Semiotic Rosetta Stone &middot; Three Teaching Depths</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The UCP V5 telescope. Adds formal Perception step to SAGE: Is the Sign intact? Has the Signal been manipulated? Has the Interpretant been replaced? Six-level Rosetta Stone from molecular to civilizational. Three depth options: vocabulary (15 min), diagnostic (45 min), formal derivation. Full walkthrough on Home Health, Challenger, and HHVBP.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag" style="background:rgba(20,184,166,.15);color:#14b8a6">Deep Dive</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="quiz-q" id="q1">
+    <div class="quiz-q-text">1. In the simulation, what happens to Present Integration (a worker's capacity for focused, engaged attention) in Scenario 1?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">It stays stable throughout because workers adapt to the pressure</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',true)">It crashes from 0.85 to 0.09 within the first 10 steps and stays near zero</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">It declines slowly over the full simulation period</button>
+      <button class="quiz-opt" onclick="answer(this,'q1',false)">It improves as workers develop resilience to institutional pressure</button>
+    </div>
+    <div class="quiz-feedback" id="q1-fb"></div>
   </div>
-</div>
 
-<!-- REFERENCE TOOLS -->
-<div class="chapter-group ch-tools">
-  <div class="group-label">Reference Tools &amp; Labs</div>
-  <div class="app-grid">
-    <a class="app-card" href="ucp-metrics-reference.html">
-      <div class="app-card-head"><div class="app-card-icon">📐</div><div><div class="app-card-title">UCP Metrics Reference</div><div class="app-card-type">Technical Reference</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Complete technical documentation for every simulation metric: formulas, ranges, research grounding, and parameter interactions.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Reference</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="ucp-student-guide.html">
-      <div class="app-card-head"><div class="app-card-icon">📖</div><div><div class="app-card-title">Student Guide</div><div class="app-card-type">How to Use the Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Plain-language guide to running simulations, reading metrics, and connecting results to the course concepts.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Guide</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="metrics-calibration-lab.html">
-      <div class="app-card-head"><div class="app-card-icon">🧪</div><div><div class="app-card-title">Metrics Calibration Lab</div><div class="app-card-type">Interactive Lab</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Hands-on parameter exploration. Adjust worldview distributions and evidence architectures and watch metrics respond in real time.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Lab</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="worldview-comparison.html">
-      <div class="app-card-head"><div class="app-card-icon">🌐</div><div><div class="app-card-title">Worldview Comparison</div><div class="app-card-type">Reference Tool</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Side-by-side comparison of the five worldview frameworks. What each sees, what each misses, and how they interact in the simulation.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Reference</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="trans-temporal-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">⏳</div><div><div class="app-card-title">Trans-Temporal Explorer</div><div class="app-card-type">Research Tool</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Generational transmission of coordination capacity. How institutional patterns propagate across time and what degrades or improves them.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Research</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="cte-challenge.html">
-      <div class="app-card-head"><div class="app-card-icon">🏈</div><div><div class="app-card-title">CTE Challenge</div><div class="app-card-type">Case Study</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The NFL's CTE crisis as a coordination failure case. Capability-based coordination in practice.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Study</span><span class="app-card-arrow">→</span></div>
-    </a>
+  <div class="quiz-q" id="q2">
+    <div class="quiz-q-text">2. The Welfare State scenario (Scenario 2) collects more in taxes and funds repair programs. What does the simulation show about its effect on workers compared to Scenario 1?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">Workers are significantly better protected — retention improves from 17% to 45%</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">Workers are somewhat better protected — retention improves from 17% to 30%</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',true)">Worker outcomes are nearly identical — 16% retention vs 17%, because the harm mechanism is unchanged</button>
+      <button class="quiz-opt" onclick="answer(this,'q2',false)">Workers are worse off because higher taxes reduce institutional investment in worker support</button>
+    </div>
+    <div class="quiz-feedback" id="q2-fb"></div>
   </div>
-</div>
 
-<div style="text-align:center;padding:2rem 0 1rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.2)">
-  Ethics Beyond Boundaries &middot; Saint Petersburg College &middot; Ethics Institute &middot; &copy; 2026
-</div>
-
-</div>
-</body>
-</html> &mdash; The Visible Parasite (Applied Sequence &middot; Synthesis)</div>
-  <div class="app-grid">
-    <a class="app-card" href="chapter15-visible-parasite-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#128302;</div><div><div class="app-card-title">The Visible Parasite</div><div class="app-card-type">SAGE Analysis &middot; Capability Tool &middot; T1/T2 Classifier</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">What 12,239 agencies confirmed about institutional parasitism. Scale explorer from individual to civilization. SAGE applied to the nursing home structural scenario. Capability-based ethics tool: what you can actually do from where you are. T1/T2 classifier for any proposed action.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Synthesis</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="quiz-q" id="q3">
+    <div class="quiz-q-text">3. What is the core ethical argument for the Biobond mechanism shown in Scenario 3?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">It makes institutions more profitable by reducing worker turnover costs</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">It replaces government regulation with private sector accountability</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',true)">It makes the externalized costs of workforce harm financially visible to the institution that generates them, changing the incentive structure without requiring institutional virtue</button>
+      <button class="quiz-opt" onclick="answer(this,'q3',false)">It gives workers greater bargaining power by organizing them into coalitions</button>
+    </div>
+    <div class="quiz-feedback" id="q3-fb"></div>
   </div>
-</div>
 
-<div class="divider"></div>
-
-<!-- PSAGE DEEP DIVE -->
-<div class="chapter-group" style="border-left:3px solid #14b8a6">
-  <div class="group-label" style="color:#14b8a6">P-SAGE &mdash; Professional Ethical Analysis Protocol (Deep Dive)</div>
-  <div class="app-grid">
-    <a class="app-card" href="psage-deep-dive-app.html">
-      <div class="app-card-head"><div class="app-card-icon">&#128302;</div><div><div class="app-card-title">P-SAGE Deep Dive</div><div class="app-card-type">Perception + SAGE &middot; Semiotic Rosetta Stone &middot; Three Teaching Depths</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The UCP V5 telescope. Adds formal Perception step to SAGE: Is the Sign intact? Has the Signal been manipulated? Has the Interpretant been replaced? Six-level Rosetta Stone from molecular to civilizational. Three depth options: vocabulary (15 min), diagnostic (45 min), formal derivation. Full walkthrough on Home Health, Challenger, and HHVBP.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag" style="background:rgba(20,184,166,.15);color:#14b8a6">Deep Dive</span><span class="app-card-arrow">&#8594;</span></div>
-    </a>
+  <div class="quiz-q" id="q4">
+    <div class="quiz-q-text">4. A nursing home reduces staffing ratios to improve quarterly earnings. Which ethical framework is MOST directly violated by this decision?</div>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,'q4',false)">Virtue ethics — the decision reflects poor character on the part of executives</button>
+      <button class="quiz-opt" onclick="answer(this,'q4',false)">Social contract theory — it violates the terms of the institution's charter</button>
+      <button class="quiz-opt" onclick="answer(this,'q4',true)">Care ethics — it structurally prevents workers from providing the attentive, relational care that vulnerable residents require, prioritizing financial metrics over responsiveness to particular persons</button>
+      <button class="quiz-opt" onclick="answer(this,'q4',false)">Consequentialism — the total harm outweighs the financial benefit</button>
+    </div>
+    <div class="quiz-feedback" id="q4-fb"></div>
   </div>
-</div>
-
-<!-- REFERENCE TOOLS -->
-<div class="chapter-group ch-tools">
-  <div class="group-label">Reference Tools &amp; Labs</div>
-  <div class="app-grid">
-    <a class="app-card" href="ucp-metrics-reference.html">
-      <div class="app-card-head"><div class="app-card-icon">📐</div><div><div class="app-card-title">UCP Metrics Reference</div><div class="app-card-type">Technical Reference</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Complete technical documentation for every simulation metric: formulas, ranges, research grounding, and parameter interactions.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Reference</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="ucp-student-guide.html">
-      <div class="app-card-head"><div class="app-card-icon">📖</div><div><div class="app-card-title">Student Guide</div><div class="app-card-type">How to Use the Simulation</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Plain-language guide to running simulations, reading metrics, and connecting results to the course concepts.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Guide</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="metrics-calibration-lab.html">
-      <div class="app-card-head"><div class="app-card-icon">🧪</div><div><div class="app-card-title">Metrics Calibration Lab</div><div class="app-card-type">Interactive Lab</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Hands-on parameter exploration. Adjust worldview distributions and evidence architectures and watch metrics respond in real time.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-simulation">Lab</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="worldview-comparison.html">
-      <div class="app-card-head"><div class="app-card-icon">🌐</div><div><div class="app-card-title">Worldview Comparison</div><div class="app-card-type">Reference Tool</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Side-by-side comparison of the five worldview frameworks. What each sees, what each misses, and how they interact in the simulation.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Reference</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="trans-temporal-explorer.html">
-      <div class="app-card-head"><div class="app-card-icon">⏳</div><div><div class="app-card-title">Trans-Temporal Explorer</div><div class="app-card-type">Research Tool</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">Generational transmission of coordination capacity. How institutional patterns propagate across time and what degrades or improves them.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-reference">Research</span><span class="app-card-arrow">→</span></div>
-    </a>
-    <a class="app-card" href="cte-challenge.html">
-      <div class="app-card-head"><div class="app-card-icon">🏈</div><div><div class="app-card-title">CTE Challenge</div><div class="app-card-type">Case Study</div></div></div>
-      <div class="app-card-body"><div class="app-card-desc">The NFL's CTE crisis as a coordination failure case. Capability-based coordination in practice.</div></div>
-      <div class="app-card-footer"><span class="app-card-tag tag-case">Case Study</span><span class="app-card-arrow">→</span></div>
-    </a>
-  </div>
-</div>
-
-<div style="text-align:center;padding:2rem 0 1rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.2)">
-  Ethics Beyond Boundaries &middot; Saint Petersburg College &middot; Ethics Institute &middot; &copy; 2026
-</div>
 
 </div>
+
+</main>
+
+<script>
+// ── SIMULATION DATA ──────────────────────────────────────────────────────────
+const SIM = {"1": {"Public_Deficit": [0.0, -12.9197, -25.2516, -39.1743, -51.8791, -64.3021, -77.5934, -87.6535, -98.4947, -108.2488, -117.615, -124.7065, -130.2055, -135.3332, -138.9553, -141.8594, -143.9391, -145.3335, -146.4896, -148.4487, -148.9529, -149.0671, -147.8626, -146.7061, -144.3706, -142.4331, -141.3411, -138.2443, -135.5088, -131.4959, -131.1996, -127.9988, -124.0522, -117.8148, -110.1975, -101.1495, -91.5565, -80.9308, -69.9328, -69.9328], "Avg_FHRI": [100.0, 100.0, 100.0, 100.0, 100.0, 92.575, 85.2245, 77.9476, 63.3185, 56.2607, 34.4234, 24.4727, 21.6542, 19.4679, 16.0703, 8.7422, 6.4374, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Avg_Moral_Debt": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Total_Profit": [0.0, -70.8028, -76.6807, -60.7735, -72.9518, -72.77, -61.0876, -90.3985, -76.5886, -84.459, -79.3379, -96.0844, -107.0104, -104.7232, -112.7787, -113.9585, -119.2036, -121.0559, -119.4389, -109.4094, -118.9578, -120.858, -126.0449, -121.5647, -129.3552, -124.3754, -113.9196, -127.9676, -121.3553, -131.1293, -89.9632, -107.0072, -107.4665, -125.3738, -130.1733, -137.4797, -137.9303, -145.2567, 0.0, 0.0], "System_Friction": [0.4767, 0.4757, 0.4747, 0.4737, 0.4727, 0.4717, 0.4707, 0.4697, 0.4687, 0.4677, 0.4667, 0.4657, 0.4647, 0.4638, 0.4628, 0.4618, 0.4608, 0.4598, 0.4588, 0.4578, 0.4568, 0.4558, 0.4548, 0.4538, 0.4528, 0.4518, 0.4508, 0.4498, 0.4488, 0.4479, 0.4469, 0.4459, 0.4449, 0.4439, 0.4429, 0.4419, 0.4409, 0.4399, 0.0, 0.0], "Meta_Constructor_Count": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 87.0, 75.0, 68.0, 63.0, 54.0, 47.0, 42.0, 39.0, 34.0, 34.0], "Avg_ATCF_HC": [0.8556, 0.8817, 0.8932, 0.9082, 0.9087, 0.9101, 0.9175, 0.9006, 0.9017, 0.903, 0.915, 0.9151, 0.9124, 0.9122, 0.9118, 0.9079, 0.9003, 0.8948, 0.8913, 0.8973, 0.8938, 0.8849, 0.8901, 0.892, 0.8939, 0.8936, 0.9037, 0.8973, 0.9024, 0.8929, 0.8887, 0.8823, 0.8843, 0.8652, 0.8578, 0.8536, 0.8665, 0.8625, 0.8639, 0.8639], "Avg_ATCF_PI": [0.8522, 0.7426, 0.6331, 0.5238, 0.4147, 0.3085, 0.2103, 0.1426, 0.108, 0.0965, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939], "Avg_ATCF_PC": [0.854, 0.9052, 0.9461, 0.9736, 0.9908, 0.9995, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Avg_ATCF_MCC": [0.6508, 0.682, 0.7133, 0.7445, 0.7758, 0.8076, 0.8392, 0.8708, 0.8981, 0.9222, 0.945, 0.9627, 0.9771, 0.9868, 0.9939, 0.9986, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Worker_Count": [200.0, 200.0, 200.0, 200.0, 200.0, 197.0, 194.0, 191.0, 185.0, 182.0, 173.0, 167.0, 162.0, 156.0, 149.0, 143.0, 140.0, 135.0, 131.0, 129.0, 124.0, 122.0, 114.0, 110.0, 106.0, 105.0, 103.0, 97.0, 94.0, 91.0, 87.0, 75.0, 68.0, 63.0, 54.0, 47.0, 42.0, 39.0, 34.0, 34.0]}, "2": {"Public_Deficit": [0.0, -40.539, -80.3383, -122.2183, -164.1515, -207.088, -247.5701, -279.225, -308.0953, -335.3796, -359.9428, -383.447, -407.0467, -421.6804, -439.4633, -453.825, -465.132, -469.4939, -472.9693, -474.028, -467.1342, -456.0465, -444.582, -436.2713, -426.3813, -413.609, -403.6232, -390.7861, -376.7029, -361.9934, -356.0559, -345.7099, -332.6804, -313.2122, -285.5699, -254.5476, -219.5963, -184.0658, -184.0658, -184.0658], "Avg_FHRI": [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 90.1, 72.8742, 55.8209, 46.3632, 41.3372, 29.3017, 24.8115, 7.9912, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Avg_Moral_Debt": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Total_Profit": [0.0, -64.87, -67.3356, -60.4001, -60.2227, -56.8784, -61.0595, -83.4837, -85.7656, -87.0525, -93.1225, -90.6528, -88.3342, -110.2211, -93.7237, -99.1278, -104.3099, -117.4605, -115.4152, -117.4709, -133.9794, -141.9589, -142.2152, -127.7021, -131.967, -136.5743, -126.2858, -130.7906, -130.9439, -129.0318, -97.7916, -107.4867, -109.4315, -123.8939, -138.1413, -145.4076, -152.5043, 0.0, 0.0, 0.0], "System_Friction": [0.5055, 0.5045, 0.5035, 0.5025, 0.5015, 0.5005, 0.4995, 0.4986, 0.4976, 0.4966, 0.4956, 0.4946, 0.4936, 0.4926, 0.4916, 0.4906, 0.4896, 0.4886, 0.4876, 0.4866, 0.4856, 0.4846, 0.4836, 0.4827, 0.4817, 0.4807, 0.4797, 0.4787, 0.4777, 0.4767, 0.4757, 0.4747, 0.4737, 0.4727, 0.4717, 0.4707, 0.4697, 0.0, 0.0, 0.0], "Meta_Constructor_Count": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 77.0, 73.0, 66.0, 59.0, 46.0, 42.0, 36.0, 31.0, 31.0, 31.0], "Avg_ATCF_HC": [0.8542, 0.8813, 0.8973, 0.9119, 0.9213, 0.9259, 0.9274, 0.9157, 0.9084, 0.9074, 0.898, 0.8981, 0.8996, 0.8847, 0.891, 0.8937, 0.8969, 0.8993, 0.9006, 0.9069, 0.9079, 0.8962, 0.8833, 0.8945, 0.8937, 0.8904, 0.8963, 0.8958, 0.9078, 0.9131, 0.9084, 0.9002, 0.9099, 0.899, 0.8916, 0.876, 0.859, 0.8617, 0.8617, 0.8617], "Avg_ATCF_PI": [0.8519, 0.735, 0.6183, 0.5018, 0.3854, 0.2693, 0.1703, 0.1109, 0.0939, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0938, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939, 0.0939], "Avg_ATCF_PC": [0.8418, 0.8938, 0.935, 0.9673, 0.989, 0.9993, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Avg_ATCF_MCC": [0.6589, 0.6902, 0.7214, 0.7527, 0.7839, 0.8152, 0.8461, 0.8779, 0.9056, 0.9298, 0.9488, 0.9639, 0.9769, 0.9867, 0.9944, 0.9989, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Worker_Count": [200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 196.0, 189.0, 182.0, 178.0, 175.0, 169.0, 167.0, 159.0, 153.0, 147.0, 142.0, 132.0, 127.0, 121.0, 111.0, 105.0, 104.0, 100.0, 99.0, 94.0, 93.0, 88.0, 84.0, 80.0, 78.0, 73.0, 66.0, 59.0, 46.0, 42.0, 36.0, 31.0, 31.0, 31.0]}, "3": {"Public_Deficit": [0.0, 44.0777, 79.3902, 107.7117, 129.5341, 145.2536, 156.5174, 163.2861, 166.5301, 168.016, 165.9194, 160.9492, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184, 154.5184], "Avg_FHRI": [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Avg_Moral_Debt": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Total_Profit": [0.0, -640.7771, -553.1252, -483.2146, -418.2244, -357.1942, -312.638, -267.6873, -232.4398, -214.8596, -179.0333, -150.2985, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "System_Friction": [0.2954, 0.2748, 0.2542, 0.2336, 0.213, 0.1923, 0.1717, 0.1511, 0.1305, 0.1099, 0.0893, 0.0708, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Meta_Constructor_Count": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "Avg_ATCF_HC": [0.8532, 0.8818, 0.9078, 0.9257, 0.9386, 0.9507, 0.9557, 0.9613, 0.9679, 0.9656, 0.9679, 0.9705, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675, 0.9675], "Avg_ATCF_PI": [0.8491, 0.8333, 0.8198, 0.8088, 0.8001, 0.7939, 0.7899, 0.7882, 0.7887, 0.7912, 0.7958, 0.8022, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105, 0.8105], "Avg_ATCF_PC": [0.8465, 0.8988, 0.9396, 0.9711, 0.9916, 0.9995, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], "Avg_ATCF_MCC": [0.6362, 0.6675, 0.6988, 0.7301, 0.7614, 0.7927, 0.8241, 0.855, 0.8833, 0.9087, 0.9318, 0.9516, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677, 0.9677], "Worker_Count": [200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0]}};
+
+const STEPS = 40;
+const LABELS = Array.from({length:STEPS},(_,i)=>i);
+const C1='#c0392b', C2='#e67e22', C3='#27ae60';
+const C1A='rgba(192,57,43,', C2A='rgba(230,126,34,', C3A='rgba(39,174,96,';
+
+Chart.defaults.font.family = "'Source Serif 4', Georgia, serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = 'rgba(15,17,23,.65)';
+
+function mk(id, cfg){ return new Chart(document.getElementById(id), cfg); }
+
+function lineDS(label,data,color,colA,dash=[]){
+  return { label, data, borderColor:color, backgroundColor:colA+'0.08)', borderWidth:2.5,
+    pointRadius:0, pointHitRadius:12, fill:true, tension:0.3, borderDash:dash };
+}
+
+// ── Charts ──────────────────────────────────────────────────────────────────
+function buildCharts(){
+  // S1: workers + PI
+  mk('chart-s1-workers',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      {label:'Workers remaining',data:SIM['1'].Worker_Count,borderColor:C1,backgroundColor:C1A+'0.08)',borderWidth:2.5,pointRadius:0,fill:true,tension:0.3,yAxisID:'y'},
+      {label:'Present Integration (engagement)',data:SIM['1'].Avg_ATCF_PI,borderColor:'#8B4A9C',backgroundColor:'rgba(139,74,156,.06)',borderWidth:2,pointRadius:0,fill:false,tension:0.3,yAxisID:'y2',borderDash:[5,4]}
+    ]
+  }, options:{responsive:true,interaction:{mode:'index',intersect:false},scales:{
+    y:{title:{display:true,text:'Workers'},min:0,max:200},
+    y2:{title:{display:true,text:'Present Integration (0–1)'},min:0,max:1,position:'right',grid:{drawOnChartArea:false}}
+  },plugins:{legend:{position:'bottom'}}}});
+
+  // S1: deficit
+  mk('chart-s1-deficit',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[{label:'Public cost of repairing harm',data:SIM['1'].Public_Deficit,borderColor:C1,backgroundColor:C1A+'0.12)',borderWidth:2.5,pointRadius:0,fill:true,tension:0.3}]
+  }, options:{responsive:true,scales:{y:{title:{display:true,text:'Public deficit (units)'}}},plugins:{legend:{position:'bottom'}}}});
+
+  // S2: compare workers S1 vs S2
+  mk('chart-s2-compare',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      {label:'S1 — Business as Usual workers',data:SIM['1'].Worker_Count,borderColor:C1,borderWidth:2.5,pointRadius:0,fill:false,tension:0.3,borderDash:[6,3]},
+      {label:'S2 — Welfare State workers',data:SIM['2'].Worker_Count,borderColor:C2,backgroundColor:C2A+'0.08)',borderWidth:2.5,pointRadius:0,fill:true,tension:0.3}
+    ]
+  }, options:{responsive:true,scales:{y:{title:{display:true,text:'Workers remaining'},min:0,max:200}},plugins:{legend:{position:'bottom'}}}});
+
+  // S2: deficit comparison
+  mk('chart-s2-deficit',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      {label:'S1 — Business as Usual',data:SIM['1'].Public_Deficit,borderColor:C1,borderWidth:2,pointRadius:0,fill:false,tension:0.3,borderDash:[6,3]},
+      {label:'S2 — Welfare State',data:SIM['2'].Public_Deficit,borderColor:C2,backgroundColor:C2A+'0.10)',borderWidth:2.5,pointRadius:0,fill:true,tension:0.3}
+    ]
+  }, options:{responsive:true,scales:{y:{title:{display:true,text:'Public deficit (units)'}}},plugins:{legend:{position:'bottom'}}}});
+
+  // S3: workers + PI
+  mk('chart-s3-workers',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      {label:'Workers remaining',data:SIM['3'].Worker_Count,borderColor:C3,backgroundColor:C3A+'0.10)',borderWidth:2.5,pointRadius:0,fill:true,tension:0.3,yAxisID:'y'},
+      {label:'Present Integration',data:SIM['3'].Avg_ATCF_PI,borderColor:'#8B4A9C',backgroundColor:'rgba(139,74,156,.06)',borderWidth:2,pointRadius:0,fill:false,tension:0.3,yAxisID:'y2',borderDash:[5,4]}
+    ]
+  }, options:{responsive:true,interaction:{mode:'index',intersect:false},scales:{
+    y:{title:{display:true,text:'Workers'},min:0,max:200},
+    y2:{title:{display:true,text:'Present Integration (0–1)'},min:0,max:1,position:'right',grid:{drawOnChartArea:false}}
+  },plugins:{legend:{position:'bottom'}}}});
+
+  // S3: deficit
+  mk('chart-s3-deficit',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      {label:'S1 — Business as Usual',data:SIM['1'].Public_Deficit,borderColor:C1,borderWidth:1.5,pointRadius:0,fill:false,tension:0.3,borderDash:[6,3]},
+      {label:'S3 — Structural Change',data:SIM['3'].Public_Deficit,borderColor:C3,backgroundColor:C3A+'0.08)',borderWidth:2.5,pointRadius:0,fill:true,tension:0.3}
+    ]
+  }, options:{responsive:true,scales:{y:{title:{display:true,text:'Balance (positive = surplus)'}}},plugins:{legend:{position:'bottom'}}}});
+
+  // Compare: worker retention
+  mk('chart-comp-workers',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      lineDS('① Business as Usual',SIM['1'].Worker_Count,C1,C1A),
+      lineDS('② Welfare State',SIM['2'].Worker_Count,C2,C2A,[4,3]),
+      lineDS('③ Structural Change',SIM['3'].Worker_Count,C3,C3A)
+    ]
+  }, options:{responsive:true,scales:{y:{title:{display:true,text:'Workers remaining (started at 200)'},min:0,max:210}},plugins:{legend:{position:'bottom'}}}});
+
+  // Compare: PI
+  mk('chart-comp-pi',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      lineDS('① Business as Usual',SIM['1'].Avg_ATCF_PI,C1,C1A),
+      lineDS('② Welfare State',SIM['2'].Avg_ATCF_PI,C2,C2A,[4,3]),
+      lineDS('③ Structural Change',SIM['3'].Avg_ATCF_PI,C3,C3A)
+    ]
+  }, options:{responsive:true,scales:{y:{title:{display:true,text:'Present Integration (0 = burned out, 1 = fully engaged)'},min:0,max:1.05}},plugins:{legend:{position:'bottom'}}}});
+
+  // Compare: deficit
+  mk('chart-comp-deficit',{ type:'line', data:{
+    labels:LABELS,
+    datasets:[
+      lineDS('① Business as Usual',SIM['1'].Public_Deficit,C1,C1A),
+      lineDS('② Welfare State',SIM['2'].Public_Deficit,C2,C2A,[4,3]),
+      lineDS('③ Structural Change',SIM['3'].Public_Deficit,C3,C3A)
+    ]
+  }, options:{responsive:true,scales:{y:{title:{display:true,text:'Public deficit / surplus'}}},plugins:{legend:{position:'bottom'}}}});
+}
+
+// ── Hero stats ──────────────────────────────────────────────────────────────
+function buildStats(){
+  const stats = [
+    {
+      id:'stats-s1',
+      data:[
+        {n:'17%', l:'Workers retained by end'},
+        {n:'0.09', l:'Final engagement level\n(started at 0.85)'},
+        {n:'−149', l:'Peak public cost\n(taxpayer spending)'}
+      ]
+    },
+    {
+      id:'stats-s2',
+      data:[
+        {n:'16%', l:'Workers retained by end'},
+        {n:'2.6×', l:'Welfare State deficit\nvs Business as Usual'},
+        {n:'Same', l:'Worker outcomes despite\nhigher spending'}
+      ]
+    },
+    {
+      id:'stats-s3',
+      data:[
+        {n:'100%', l:'Workers retained\nthroughout'},
+        {n:'0.81', l:'Final engagement level\n(nearly unchanged)'},
+        {n:'+155', l:'Final public balance\n(surplus, not deficit)'}
+      ]
+    }
+  ];
+  stats.forEach(s=>{
+    const el=document.getElementById(s.id);
+    if(!el) return;
+    el.innerHTML=s.data.map(d=>`<div class="stat-cell"><div class="stat-number">${d.n}</div><div class="stat-label">${d.l.replace('\n','<br>')}</div></div>`).join('');
+  });
+}
+
+// ── Panel switching ──────────────────────────────────────────────────────────
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.scen-btn').forEach(b=>b.classList.remove('active'));
+  const map={s1:0,s2:1,s3:2,compare:3};
+  document.querySelectorAll('.scen-btn')[map[id]].classList.add('active');
+}
+
+// ── Quiz ──────────────────────────────────────────────────────────────────────
+const feedback={
+  q1:{t:'Correct. Present Integration — the capacity for focused, engaged attention — crashes to near zero within the first 10 simulation steps and stays there. Workers who remain in the system are present physically but depleted cognitively and emotionally.',
+      f:'Look at the chart for Scenario 1. The purple dotted line (Present Integration) drops from 0.85 to 0.09 within the first 10 steps — not gradually, but within the first few rounds of extraction pressure.'},
+  q2:{t:'Correct. The welfare state adds cost but does not change the underlying harm mechanism. Institutions still extract at the same rate with the same friction. Workers still burn out at the same rate. The safety net subsidizes the damage without preventing it.',
+      f:'Compare the worker retention lines for Scenarios 1 and 2 in the comparison chart. They are nearly identical: 17% vs 16%. The welfare state costs more (much larger deficit) while producing essentially the same worker outcomes.'},
+  q3:{t:'Correct. The Biobond mechanism makes externalized costs financially visible. The institution bears the cost of harm it generates through higher cost of capital, creating a financial incentive to reduce harm without requiring the institution to be virtuous.',
+      f:'The key word is structural. Scenario 3 does not make institutions more virtuous — it changes the financial incentive structure so that harming workers becomes more expensive for the institution.'},
+  q4:{t:'Correct. Care ethics is the framework most directly violated because it centers on responsiveness to the particular vulnerability of those in our care — residents, in this case. By eliminating the capacity for attentive, relational care (through depleted workers), the nursing home fails the care ethics standard most fundamentally.',
+      f:'While all five frameworks are violated, care ethics is most directly engaged because it focuses on the relational and situational quality of care for the vulnerable — which is precisely what understaffing destroys.'}
+};
+const answered={};
+function answer(btn,qid,correct){
+  if(answered[qid]) return;
+  answered[qid]=true;
+  const opts=btn.closest('.quiz-options').querySelectorAll('.quiz-opt');
+  opts.forEach(b=>{b.disabled=true});
+  btn.classList.add(correct?'correct':'wrong');
+  const fb=document.getElementById(qid+'-fb');
+  if(fb){ fb.textContent=(correct?'✓ ':'✗ ')+(correct?feedback[qid].t:feedback[qid].f); }
+}
+
+// ── AI ──────────────────────────────────────────────────────────────────────
+const SYS=`You are an ethics instructor AI assistant for Ethics Beyond Boundaries (EBB), helping students understand a metabolic economy simulation that models how institutional design affects workers.
+
+The simulation shows three scenarios:
+- Scenario 1 (Business as Usual): High extraction (0.8), high friction (0.5), no accountability. Result: 83% of workers burn out. Present Integration (capacity to do attentive, skilled work) crashes from 0.85 to 0.09 within 10 steps.
+- Scenario 2 (Welfare State): Same extraction and friction, higher taxes for repair programs. Result: Nearly identical worker outcomes (16% vs 17% retention). But the public deficit is 2.6x larger because harm keeps being generated at the same rate.
+- Scenario 3 (Structural Change/Biobond): Lower extraction (0.5), lower friction (0.3), Bio-Bond mechanism where worker harm increases cost of capital. Result: 100% of workers retained. Present Integration stays at 0.81. Public balance ends in surplus (+155).
+
+Real-world applications include nursing home chains and private prison operators.
+
+Key course frameworks:
+- PRF (Phenomenological Reference Framework): personal moral lens
+- Suppression gap: distance between capacity and what institution permits
+- SAGE: Seeing, Analyzing, Generating, Evaluating
+- Five ethical traditions: virtue ethics, Kantian deontology, consequentialism, care ethics, social contract theory
+- ATCF: temporal coherence function (Historical Continuity, Present Integration, Prospective Coherence, Meta-Constructor Capacity)
+- Biobond: financial instrument that makes externalized workforce harm costs visible on balance sheets
+
+Answer clearly for a first-year college student. Use plain language. Connect to the simulation data when relevant. Maximum 250 words. Do not use jargon without explaining it.`;
+
+async function sendAI(){
+  const input=document.getElementById('ai-input');
+  const btn=document.getElementById('ai-btn');
+  const resp=document.getElementById('ai-response');
+  const q=input.value.trim();
+  if(!q) return;
+  btn.disabled=true;
+  btn.textContent='Thinking…';
+  resp.className='ai-response visible';
+  resp.innerHTML='<span class="ai-loading">Reading the simulation data…</span>';
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:SYS,messages:[{role:'user',content:q}]})
+    });
+    const d=await r.json();
+    const text=(d.content&&d.content[0]&&d.content[0].text)||'Sorry, I could not generate a response.';
+    resp.textContent=text;
+  } catch(e){
+    resp.textContent='Connection issue. Try refreshing or check your network.';
+  }
+  btn.disabled=false;
+  btn.textContent='Ask →';
+  input.value='';
+}
+
+function askPreset(btn){
+  document.getElementById('ai-input').value=btn.textContent.trim();
+  sendAI();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildStats();
+buildCharts();
+</script>
 </body>
 </html>
