@@ -582,7 +582,13 @@ body{
 
 <!-- ══ AI PANEL ══ -->
 <div class="ai-panel">
-  <h3>Ask About What You're Seeing</h3>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:.4rem">
+    <h3 style="margin-bottom:0">Ask About What You're Seeing</h3>
+    <span id="ai-status" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(248,245,239,.45);padding:.3rem .7rem;border:1px solid rgba(255,255,255,.1);border-radius:999px">
+      <span id="ai-status-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(248,245,239,.3);display:inline-block;flex-shrink:0"></span>
+      <span id="ai-status-text">Checking…</span>
+    </span>
+  </div>
   <p>Ask a question about the simulation, what it reveals about real institutions like nursing homes or private prisons, or how the ethical frameworks in this course apply to what the data shows.</p>
   <div class="ai-questions">
     <button class="ai-q" onclick="askPreset(this)">What does this simulation tell us about nursing home workers specifically?</button>
@@ -827,6 +833,9 @@ function answer(btn,qid,correct){
 }
 
 // ── AI ──────────────────────────────────────────────────────────────────────
+const BACKEND='https://ucp-backend-4dig.onrender.com/api/claude-proxy';
+let backendOnline=false;
+
 const SYS=`You are an ethics instructor AI assistant for Ethics Beyond Boundaries (EBB), helping students understand a metabolic economy simulation that models how institutional design affects workers.
 
 The simulation shows three scenarios:
@@ -846,27 +855,145 @@ Key course frameworks:
 
 Answer clearly for a first-year college student. Use plain language. Connect to the simulation data when relevant. Maximum 250 words. Do not use jargon without explaining it.`;
 
+// Pre-written answers for the five preset questions — used as fallback if backend unavailable
+const FALLBACKS={
+  'What does this simulation tell us about nursing home workers specifically?':
+`The simulation models what happens inside institutions that push workers hard and create bureaucratic friction that blocks their best efforts — which describes many nursing home chains operating for shareholder returns rather than care quality.
+
+The most important metric here is Present Integration — a worker's capacity for focused, attentive engagement. For a nursing aide, this is what makes genuine care possible: being present with a resident, noticing what they need, responding with skill and attention. In Scenario 1, that capacity crashes from 0.85 to 0.09 within the first 10 simulation steps and stays near zero for the rest of the run.
+
+This is not because workers stopped caring. The institutional structure — high extraction pressure, high bureaucratic friction — depleted the psychological and neurological substrate of care itself. Workers who remain in the system are physically present but cognitively and emotionally depleted.
+
+Research on actual nursing home workers confirms exactly this pattern: high rates of burnout, moral injury (the harm caused by being forced to act against your values), early exit from the profession, and reduced quality of care for residents. The simulation predicts these outcomes from the institutional design parameters alone — before any individual worker characteristic is considered.
+
+The ethical implication: the staffing ratio and operational friction are not just management decisions. They determine whether attentive, relational care is structurally possible at all.`,
+
+  'Why does the Welfare State make things worse, not better?':
+`The Welfare State scenario collects more in taxes and funds repair programs — healthcare subsidies, mental health services, workforce support. On paper this looks like an improvement. The simulation shows otherwise.
+
+Notice what Scenario 2 does NOT change: the extraction rate stays at 0.8 (identical to Business as Usual) and the friction coefficient stays at 0.5 (also identical). The mechanism generating the harm is completely unchanged. What the Welfare State does is pay for the damage that the same mechanism keeps generating at the same rate.
+
+This is the Tums Strategy. If you have chronic acid reflux, antacids help you manage the symptoms. But if you don't change what you eat, the underlying condition continues — and may worsen. The welfare state gives workers a safety net as they burn out. They still burn out: 16% retention vs 17% in Business as Usual. Nearly identical.
+
+But the public deficit is far worse. Scenario 2 peaks at −474 vs −149 for Scenario 1. The welfare state costs 3× more while delivering essentially the same outcome for workers. More spending, same damage.
+
+Why? Because harm is being generated faster than repair programs can address it, and the institution that generates the harm bears none of the cost. The Welfare State actually reinforces this arrangement by making it sustainable — the public absorbs the externalized costs, reducing pressure on institutions to change.
+
+This is why structural change (Scenario 3) matters: it changes the mechanism, not just the cleanup.`,
+
+  'How does care ethics see what happened to workers in Scenario 1?':
+`Care ethics, developed by philosophers Nel Noddings and Carol Gilligan, focuses on relationships, particular persons, and responsiveness to vulnerability. It asks not what abstract principle requires, but what genuine attentiveness to the specific people in our care demands.
+
+In Scenario 1, the metric that care ethics would focus on first is Present Integration — the capacity for attentive, engaged, responsive care. It crashes from 0.85 to 0.09 within 10 simulation steps. Workers who remain in the system after that point are physically present but have lost the cognitive and emotional capacity that care ethics identifies as morally central.
+
+From a care ethics perspective, this is not a productivity problem. It is a relational failure. The nursing home aide who has lost Present Integration cannot provide the attentive care that makes a resident feel seen, heard, and responded to as a particular person — not as a category, not as a body to be managed, but as someone whose specific needs and vulnerabilities matter.
+
+Care ethics would say that an institution which structurally prevents workers from being genuinely attentive — not occasionally, as a result of bad days, but as a predictable systemic outcome — has failed its most fundamental ethical obligation. The residents are harmed too, though the simulation tracks worker outcomes: the same institutional structure that burns out workers is the one that makes genuine care for residents impossible.
+
+The care ethics critique is not about rules violated. It is about relationships made structurally impossible.`,
+
+  'What would Kant say about an institution that produces this outcome?':
+`Kant's most important principle for applied ethics is what he called the humanity formula: act so that you treat humanity, whether in your own person or in the person of any other, always as an end and never merely as a means.
+
+This formula is violated when persons are used as instruments — as extraction vehicles — without regard for their own purposes, capacities, and wellbeing. Notice the key word: "merely." Kant is not saying persons can never be part of productive arrangements. He is saying they cannot be used in ways that systematically undermine the capacities that make them agents — reasoners, choosers, persons with their own purposes.
+
+In Scenario 1, the institutional design reliably destroys Present Integration, the capacity for engaged, purposeful action, in 83% of workers. This is not an accidental side effect. It is the mechanism by which the extraction model generates returns: routing worker capacity into productivity rather than into conditions where workers can actually function as persons.
+
+Kant would reject the defense that workers consented to employment. Consent to a job does not resolve the humanity formula problem — the question is whether the terms of that employment systematically undermine the capacities required for workers to remain genuine agents. When an institution deploys workers until those capacities are gone and then replaces them, treating the workforce as a renewable resource rather than as persons, Kant's answer is clear.
+
+The humanity formula names what the suppression gap measures: the distance between what workers could contribute as persons and what the institution permits.`,
+
+  'How does this connect to the suppression gap in my own Field Scan?':
+`Your Field Scan in the Navigator measures the suppression gap — the distance between your raw capacity (what you could contribute under genuinely supportive conditions) and your perceived capacity (what the institutional field actually permits you to express).
+
+The simulation makes that gap visible as a mathematical outcome. In Scenario 1, the gap between a worker's starting Present Integration (0.85) and their ending Present Integration (0.09) is the suppression gap rendered as data. Over 80% of their attentive, engaged capacity has been suppressed by the institutional structure. Not lost — suppressed. The simulation assumes the same people throughout; only the institutional parameters differ.
+
+Your Field Scan's seven questions map directly onto what the simulation models. What does this institution reward? (the extraction rate parameter) What does it punish or make costly? (the friction coefficient) Where does your effort actually go? (labor output routing) Where does it disappear? (the difference between effort and outcome)
+
+When you calculated your suppression gap number, you were doing a manual version of what the simulation does automatically for 200 agents across 40 steps.
+
+The structural question the simulation asks is the same one your Field Scan should prompt: is the gap you're experiencing a personal problem requiring individual adaptation — more discipline, more resilience, better strategies? Or is it an institutional design problem that produces the same outcome regardless of who occupies your position?
+
+The simulation's answer is consistent: when the gap is high and persistent, it is almost always structural.`
+};
+
+function setStatus(online){
+  backendOnline=online;
+  const dot=document.getElementById('ai-status-dot');
+  const txt=document.getElementById('ai-status-text');
+  const btn=document.getElementById('ai-btn');
+  const input=document.getElementById('ai-input');
+  if(online){
+    if(dot){dot.style.background='#27ae60';dot.style.boxShadow='0 0 8px rgba(39,174,96,.7)';}
+    if(txt)txt.textContent='AI Connected';
+    if(btn){btn.disabled=false;btn.textContent='Ask →';}
+    if(input)input.placeholder='Type your own question…';
+  } else {
+    if(dot){dot.style.background='#e67e22';dot.style.boxShadow='0 0 8px rgba(230,126,34,.6)';}
+    if(txt)txt.textContent='Using built-in answers';
+    if(btn){btn.disabled=false;btn.textContent='Ask →';}
+    if(input)input.placeholder='Type your own question… (preset questions use built-in answers)';
+  }
+}
+
+async function checkBackend(){
+  try{
+    const r=await fetch(BACKEND,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:5,system:'Reply OK.',messages:[{role:'user',content:'ping'}]})
+    });
+    setStatus(r.ok||r.status===400||r.status===422);
+  } catch(e){ setStatus(false); }
+}
+
 async function sendAI(){
   const input=document.getElementById('ai-input');
   const btn=document.getElementById('ai-btn');
   const resp=document.getElementById('ai-response');
   const q=input.value.trim();
   if(!q) return;
+
+  // Check for fallback match (used when offline or as instant response for known questions)
+  const fallbackKey=Object.keys(FALLBACKS).find(k=>q.toLowerCase().includes(k.toLowerCase().slice(0,30)));
+
   btn.disabled=true;
   btn.textContent='Thinking…';
   resp.className='ai-response visible';
   resp.innerHTML='<span class="ai-loading">Reading the simulation data…</span>';
+
+  // If backend offline, use fallback immediately
+  if(!backendOnline){
+    const fb=FALLBACKS[q]||fallbackKey&&FALLBACKS[fallbackKey];
+    if(fb){
+      resp.textContent=fb;
+      btn.disabled=false; btn.textContent='Ask →'; input.value='';
+      return;
+    }
+    resp.textContent='The AI assistant is temporarily unavailable. Try one of the preset questions above, which have built-in answers, or refresh and try again.';
+    btn.disabled=false; btn.textContent='Ask →';
+    return;
+  }
+
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
+    const r=await fetch(BACKEND,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:SYS,messages:[{role:'user',content:q}]})
     });
     const d=await r.json();
-    const text=(d.content&&d.content[0]&&d.content[0].text)||'Sorry, I could not generate a response.';
-    resp.textContent=text;
+    const text=(d.response||d.reply||d.text||(d.content&&d.content[0]&&d.content[0].text)||'').trim();
+    if(text){
+      resp.textContent=text;
+    } else {
+      // Backend responded but no usable text — fall back to preset if available
+      const fb=FALLBACKS[q]||fallbackKey&&FALLBACKS[fallbackKey];
+      resp.textContent=fb||'Sorry, I could not generate a response to that question. Try rephrasing or use one of the preset questions above.';
+    }
   } catch(e){
-    resp.textContent='Connection issue. Try refreshing or check your network.';
+    setStatus(false);
+    const fb=FALLBACKS[q]||fallbackKey&&FALLBACKS[fallbackKey];
+    resp.textContent=fb||'Connection issue. Try refreshing. Preset questions above have built-in answers that work offline.';
   }
   btn.disabled=false;
   btn.textContent='Ask →';
@@ -874,13 +1001,22 @@ async function sendAI(){
 }
 
 function askPreset(btn){
-  document.getElementById('ai-input').value=btn.textContent.trim();
+  const q=btn.textContent.trim();
+  // If backend offline, show fallback directly without a round-trip
+  if(!backendOnline&&FALLBACKS[q]){
+    const resp=document.getElementById('ai-response');
+    resp.className='ai-response visible';
+    resp.textContent=FALLBACKS[q];
+    return;
+  }
+  document.getElementById('ai-input').value=q;
   sendAI();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildStats();
 buildCharts();
+checkBackend();
 </script>
 </body>
 </html>
